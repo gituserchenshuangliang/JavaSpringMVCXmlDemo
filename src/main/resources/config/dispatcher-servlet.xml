@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+    <!-- 使用注解驱动 -->
+    <mvc:annotation-driven conversion-service="conversionService"/>
+
+    <!-- 静态资源访问 方法一 在web.xml中配置default-->
+    <mvc:default-servlet-handler default-servlet-name="default"/>
+
+    <!-- 静态资源访问 方法二  允许静态资源放在任何地方 -->
+    <mvc:resources location="WEB-INF/jsp/" mapping="/jsp/**"/>
+    <mvc:resources location="js/" mapping="/js/**"/>
+
+    <!-- 定义扫描装载的包 -->
+    <context:component-scan base-package="com.spring.*"/>
+
+    <!-- 找到Web工程/WEB-INF/HTML文件夹，且文件结尾为html的文件作为映射 -->
+    <bean id= "jsp" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="com.spring.view.DefaultJstlView"/>
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <!-- 向适配器注册JSON转换器 -->
+        <property name="messageConverters">
+            <list>
+                <ref bean="jsonConverter"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- HttpMessageConverter HTTP消息转换器 ，转换成JSON -->
+    <bean id="jsonConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+                <value>application/json;charset=utf-8</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 配置自定义的消息转换器 -->
+    <bean class="org.springframework.format.support.FormattingConversionServiceFactoryBean" id="conversionService">
+        <property name="converters">
+            <list>
+                <bean class="com.spring.converter.StringToRoleConverter"/>
+            </list>
+        </property>
+    </bean>
+</beans>
